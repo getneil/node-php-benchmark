@@ -21,7 +21,7 @@ app.get("/",function(req,res){
 });
 
 app.get("/list",function(req,res){
-  connection.query('SELECT * from user LIMIT 2', function(err, rows, fields) {
+  connection.query('SELECT * from user', function(err, rows, fields) {
     // connection.end();
       if (!err)
         console.log('The solution is: ', rows);
