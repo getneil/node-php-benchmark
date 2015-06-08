@@ -5,7 +5,7 @@ module.exports = function(requestId) {
   return {
 
     email: 'benchmark' + ctr + "@test.com",
-    password:,
+    password: 'test',
     firstName: 'Bench' + ctr,
     lastName: 'Mark' + ctr,
     description: 'Benchmark user number ' + ctr,
