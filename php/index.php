@@ -15,8 +15,8 @@
     return $conn;
   }
 
-  $app->get('/list', function () {
-    $query      = "SELECT * FROM benchmark.user;";
+  $app->get('/list', function () use ($app) {
+    $query      = "SELECT * FROM user;";
     $connection = connect();
     $result     = mysql_query($query);
     if (!$result) {
@@ -26,18 +26,24 @@
     while($row = mysql_fetch_assoc($result)){
       $json[] = $row;
     }
-    var_dump($json);
+    $app->response->headers->set('Content-Type', 'application/json');
     mysql_close($connection);
+    $app->response->setBody(json_encode($json));
+    return true;
   });
 
   $app->post('/create', function () use($hash, $app){
     $data     = $app->request->post();
+    if(!$data) {
+      $data = $app->request->getBody();
+    }
     $password = $hash->make($data['password']);
     $query      = sprintf("INSERT INTO `user` (`email`, `password`, `firstName`, `lastName`, `description`) VALUES ('%s', '%s', '%s', '%s', '%s');", $data['email'], $password, $data['firstName'], $data['lastName'], $data['description']);
-    var_dump($query);
+    // var_dump($query);
     $connection = connect();
     $result     = mysql_query($query) or die(mysql_error());
-    var_dump($result);
+    // var_dump($result);
+    return $app->response->setStatus(200);
     mysql_close($connection);
   });
 

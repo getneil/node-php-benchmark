@@ -7,9 +7,10 @@ var app = express();
 var pool = mysql.createPool({
   connectionLimit : 100,
   acquireTimeout: 30000,
-  host      : 'localhost',
+  host      : '192.168.9.5',
+  port      : 4003,
   user      : 'root',
-  password  : '',
+  password  : 'test',
   database  : 'benchmark',
   debig     : false
 })
