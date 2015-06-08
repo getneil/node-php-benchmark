@@ -16,7 +16,6 @@ var pool = mysql.createPool({
 
 console.log("Benchmarker!");
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 function handleDatabase(req, res){
@@ -33,7 +32,7 @@ function handleDatabase(req, res){
     
     switch(req.url){
       case '/list':
-        queryStr = 'SELECT * FROM user';
+        queryStr = 'SELECT * FROM user LIMIT 1000';
         break;
       case '/create':
         queryStr = 'INSERT INTO user SET ?';

@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
   	"express":"latest",
-  	"mysql":"latest"
+  	"mysql":"latest",
+    "bcrypt":"latest",
+    "body-parser":"latest"
   }
 
 }
