@@ -1,0 +1,8 @@
+{
+    "require": {
+        "react/react": "^0.4.2",
+        "capmousse/react-restify": "^0.2.0",
+        "slim/slim": "~2.0",
+        "illuminate/hashing": "^5.0"
+    }
+}
