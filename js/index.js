@@ -43,8 +43,7 @@ function handleDatabase(req, res){
     }
 
     // async hashing
-    if(req.body){
-      // console.log('post')
+    if(req.method == 'POST'){
       post = req.body;
       if(post.password){
         bcrypt.hash(post.password, 12, function(err, hash) {
@@ -53,24 +52,18 @@ function handleDatabase(req, res){
           query = connection.query(queryStr, post, function(err,rows){
             connection.release();
             if(!err){
-              // console.log(err, rows,'rows');
               res.json(rows);
-            }else{
-              console.log(err,'err');
             }
           });
           // console.log(query.sql,'query')
         });
       }
-    }else{
+    }else if(req.method == 'GET'){
       console.log('list')
       connection.query(queryStr, function(err,rows){
         connection.release();
         if(!err){
-          // console.log(err, rows,'rows');
           res.json(rows);
-        }else{
-          console.log(err,'err');
         }
       });
     }
