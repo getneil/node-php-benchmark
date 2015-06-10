@@ -2,7 +2,7 @@ var loadtest = require('loadtest');
 var body     = require('./load');
 data         = body.foo;
 var options  = {
-    url: 'http://192.168.9.5:5000/create',
+    url: 'http://192.168.30.11:3003/create',
     maxRequests: 1000,
     concurrency: 1000,
     maxSeconds: 30,

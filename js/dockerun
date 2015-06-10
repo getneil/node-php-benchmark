@@ -1,0 +1,3 @@
+docker run -itd -e MYSQL_ROOT_PASSWORD=test --name benchMysql -p 4004:3306 mysql:latest
+docker run -it --name jsApp -p 3003:3003 --link benchMysql:mysql -v ~/share/jsvsphp/js:/app -d node
+

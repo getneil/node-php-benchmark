@@ -2,17 +2,18 @@ var express    = require("express");
 var mysql      = require('mysql');
 var bcrypt     = require('bcrypt');
 var bodyParser = require('body-parser');
+require('events').EventEmitter.prototype._maxListeners = 100;
 var app = express();
 
 var pool = mysql.createPool({
   connectionLimit : 100,
   acquireTimeout: 30000,
-  host      : '192.168.9.5',
-  port      : 4003,
+  host      : process.env.MYSQL_PORT_3306_TCP_ADDR || '192.168.30.11',
+  port      : process.env.MYSQL_PORT_3306_TCP_PORT || 4004,
   user      : 'root',
   password  : 'test',
   database  : 'benchmark',
-  debig     : false
+  debug     : false
 })
 
 console.log("Benchmarker!");
@@ -29,7 +30,6 @@ function handleDatabase(req, res){
       return;
     }
     console.log("connected as id " + connection.threadId);
-    // console.log(req.url,req.route.path,req.route.methods,'req'); 
     
     switch(req.url){
       case '/list':
@@ -41,22 +41,39 @@ function handleDatabase(req, res){
       default:
         queryStr = 'SELECT * FROM user LIMIT 1';
     }
-    console.log(req.body,'req.body')
+
+    // async hashing
     if(req.body){
+      // console.log('post')
       post = req.body;
       if(post.password){
-        post.password = bcrypt.hashSync(post.password, 12);
-        // console.log(post,'post pass')
+        bcrypt.hash(post.password, 12, function(err, hash) {
+          post.password = hash
+          console.log(post,'post')
+          query = connection.query(queryStr, post, function(err,rows){
+            connection.release();
+            if(!err){
+              // console.log(err, rows,'rows');
+              res.json(rows);
+            }else{
+              console.log(err,'err');
+            }
+          });
+          // console.log(query.sql,'query')
+        });
       }
+    }else{
+      console.log('list')
+      connection.query(queryStr, function(err,rows){
+        connection.release();
+        if(!err){
+          // console.log(err, rows,'rows');
+          res.json(rows);
+        }else{
+          console.log(err,'err');
+        }
+      });
     }
-
-    connection.query(queryStr, post, function(err,rows){
-      connection.release();
-      if(!err){
-        // console.log(rows,'rows');
-        res.json(rows);
-      }
-    });
 
     connection.on("error", function(err){
       res.json({"code":100, "status": "Error in database connection"});
@@ -66,36 +83,11 @@ function handleDatabase(req, res){
 }
 
 app.get("/list",function(req,res){
-  // console.log('list')
   handleDatabase(req,res);
-  // connection.query('SELECT * FROM user', function(err, rows, fields){
-  //   // connection.end();
-  //   if(!err){
-  //     console.log("Result: ", rows);
-  //   }else{
-  //     console.log("Error while performing Query");
-  //   }
-  // })
 });
 
 app.post("/create",function(req,res){
-  // console.log('create')
   handleDatabase(req,res);
-  // console.log(req.body,'body');
-  // if(req.body){
-  //   post = req.body;
-  //   bcrypt.hash(post.password, 12, function(err, hash){
-  //     post.password = hash;
-  //     connection.query('INSERT INTO user SET ?', post, function(err, rows, fields){
-  //       // connection.end();
-  //       if(!err){
-  //         console.log("Result: ", rows);
-  //       }else{
-  //         console.log("Error while performing Query",err);
-  //       }
-  //     })
-  //   })
-  // }
 });
 
 
