@@ -8,10 +8,12 @@ var app = express();
 var pool = mysql.createPool({
   connectionLimit : 100,
   acquireTimeout: 30000,
-  host      : process.env.MYSQL_PORT_3306_TCP_ADDR || '192.168.30.11',
-  port      : process.env.MYSQL_PORT_3306_TCP_PORT || 4004,
+  // host      : process.env.MYSQL_PORT_3306_TCP_ADDR || '192.168.30.11',
+  // port      : process.env.MYSQL_PORT_3306_TCP_PORT || 4004,
+  host      : '192.168.9.2',
+  port      : 3306,
   user      : 'root',
-  password  : 'test',
+  password  : '',
   database  : 'benchmark',
   debug     : false
 })
@@ -51,7 +53,9 @@ function handleDatabase(req, res){
           console.log(post,'post')
           query = connection.query(queryStr, post, function(err,rows){
             connection.release();
-            if(!err){
+            if(err){
+              console.log(err,'err')
+            }else{
               res.json(rows);
             }
           });
@@ -62,7 +66,9 @@ function handleDatabase(req, res){
       console.log('list')
       connection.query(queryStr, function(err,rows){
         connection.release();
-        if(!err){
+        if(err){
+          console.log(err,'err')
+        }else{
           res.json(rows);
         }
       });
