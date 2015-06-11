@@ -1,14 +1,17 @@
 var loadtest = require('loadtest');
 var body     = require('./load');
-data         = body.foo;
+
 var options  = {
-    url: 'http://192.168.30.11:3003/create',
-    maxRequests: 1000,
-    concurrency: 1000,
-    maxSeconds: 30,
+    // url: 'http://localhost:3003/create',
+    url: 'http://localhost:3003/list',
+    // concurrency: 1000,
+    // maxRequests: 1000,
+    maxSeconds: 60,
+    method: 'GET',
+    // method: 'POST',
+    // body: body,
     contentType: 'application/json',
-    method: 'POST',
-    body: data
+    requestsPerSecond: 300,
 };
 loadtest.loadTest(options, function (error, result)
 {
