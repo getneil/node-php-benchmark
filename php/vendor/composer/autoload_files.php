@@ -9,6 +9,5 @@ return array(
     $vendorDir . '/react/promise/src/functions_include.php',
     $vendorDir . '/guzzlehttp/psr7/src/functions.php',
     $vendorDir . '/danielstjules/stringy/src/Create.php',
-    $vendorDir . '/ircmaxell/password-compat/lib/password.php',
     $vendorDir . '/illuminate/support/helpers.php',
 );

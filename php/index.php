@@ -1,50 +1,49 @@
 <?php
-  require './vendor/autoload.php';
+  require 'vendor/autoload.php';
 
-  $app        = new \Slim\Slim();
-  $hash       = new \Illuminate\Hashing\BcryptHasher();
-  function connect () {
-    $servername = "192.168.9.5:4003";
-    $username   = "root";
-    $password   = "test";
-    $conn       = mysql_connect($servername, $username, $password);
-    if (!$conn) {
-      die("Connection Failed:! " . mysql_error());
-    }
-    mysql_select_db('benchmark', $conn);
-    return $conn;
+  $server = new CapMousse\ReactRestify\Server("MyAPP", "0.0.0.1");
+  $conn   = mysql_connect("192.168.9.5:4003", "root", "test");
+  if (!$conn) {
+    die('Could not connect: ' . mysql_error());
   }
+  echo 'DB Connected successfully';
+  mysql_select_db("benchmark", $conn);
 
-  $app->get('/list', function () use ($app) {
-    $query      = "SELECT * FROM user;";
-    $connection = connect();
-    $result     = mysql_query($query);
-    if (!$result) {
-      die('Invalid query: ' . mysql_error());
+  $server->get('/', function ($request, $response, $next) use ($conn) {
+    $qry    = "SELECT * FROM user;";
+    $result = mysql_query($qry);
+    $data   = array();
+    while($row = mysql_fetch_assoc($result)) {
+      $data[] = $row;
     }
-    $json = array();
-    while($row = mysql_fetch_assoc($result)){
-      $json[] = $row;
-    }
-    $app->response->headers->set('Content-Type', 'application/json');
-    mysql_close($connection);
-    $app->response->setBody(json_encode($json));
-    return true;
+    $response->write(json_encode($data));
+    mysql_close($conn);
+    $next();
   });
 
-  $app->post('/create', function () use($hash, $app){
-    $data     = $app->request->post();
-    if(!$data) {
-      $data = $app->request->getBody();
+  $server->post('/',function( $request, $response, $next) use ($conn) {
+    $post_body = file_get_contents('php://input');
+    $test = $_POST;
+    var_dump($post_body);
+    var_dump($test);
+    $hash = new Illuminate\Hashing\BcryptHasher();
+    if(!$request->email && !$request->password)
+    {
+      $response->setStatus(500);
+      return $next();
     }
-    $password = $hash->make($data['password']);
-    $query      = sprintf("INSERT INTO `user` (`email`, `password`, `firstName`, `lastName`, `description`) VALUES ('%s', '%s', '%s', '%s', '%s');", $data['email'], $password, $data['firstName'], $data['lastName'], $data['description']);
-    // var_dump($query);
-    $connection = connect();
-    $result     = mysql_query($query) or die(mysql_error());
-    // var_dump($result);
-    return $app->response->setStatus(200);
-    mysql_close($connection);
+    echo $request->email;
+    $qry    = sprintf("INSERT INTO user (email, password, firstName, lastName, description) VALUES ('%s', '%s', '%s', '%s', '%s')", $request->email, $hash->make($request->password, array("rounds" => 12)), $request->firstName, $request->lastName, $request->description);
+    $result = mysql_query($qry);
+    if(!$result) {
+      die("Failed insertion: ". mysql_error());
+    }
+    $response->write("Data inserted!");
+    mysql_close($conn);
+    $next();
   });
 
-  $app->run();
+  $runner = new CapMousse\ReactRestify\Runner($server);
+  $runner->listen(4000);
+
+
