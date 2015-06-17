@@ -1,0 +1,3 @@
+docker run -it -d --name benchSQL -p 4003:3306 -e VIRTUAL_HOST=localhost -e MYSQL_DATABASE=benchmark -e MYSQL_USER=root -e MYSQL_PASSWORD=test -e MYSQL_ROOT_PASSWORD=test mysql:latest
+docker run -it -d --name phpApp -p 4000:80 -e VIRTUAL_HOST=localhost -m 512m -c 2 --link benchSQL:mysql -v `pwd`/php:/usr/share/nginx/html josephkhu/nginx-php
+docker run -it -d --name jsApp -p 3000:3000 -e VIRTUAL_HOST=localhost -m 512m -c 2 --link benchSQL:mysql -v `pwd`/js:/app node:latest

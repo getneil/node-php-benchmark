@@ -1,0 +1,2 @@
+docker run -it -d --name mysql-benchmark -e MYSQL_ROOT_PASSWORD=test -e MYSQL_DATABASE=node-test -p 3306:3306 mysql:latest
+docker run -it -d --name node-benchmark -v `pwd`:/app -p 3000:3000 --link mysql-benchmark:mysql -m 512m -memory-swap -1 -c 1 node:latest

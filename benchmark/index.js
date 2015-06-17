@@ -21,7 +21,7 @@ process.argv.forEach(function (val, index) {
             break;
         case 3:
             language = val;
-            port     = (val == 'JS') ? 3003 : 4000;
+            port     = (val == 'JS') ? 3000 : 4000;
             break;
         case 4:
             concurrency = +val;
@@ -33,8 +33,7 @@ var body        = require('./load');
 var options     = {
     url         : 'http://'+ip+':'+port+'/'+action,
     concurrency : concurrency,
-    maxRequests : 1,
-    maxSeconds  : 1,
+    maxSeconds  : 60,
     method      : method,
     body        : body,
     contentType : 'application/json',

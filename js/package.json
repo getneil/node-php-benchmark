@@ -1,18 +1,20 @@
 {
-  "name": "benchmarkJS",
+  "name": "koa-mysql",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "koa mysql test",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Josephk",
+  "author": "neil molina",
   "license": "ISC",
   "dependencies": {
-  	"express":"latest",
-  	"mysql":"latest",
-    "bcrypt":"latest",
-    "body-parser":"latest"
+    "bcrypt": "^0.8.3",
+    "koa": "0.21.0",
+    "koa-body": "^1.2.1",
+    "koa-router": "^5.0.1",
+    "mysql": "^2.7.0",
+    "mysql2": "^0.15.7",
+    "posix": "^2.0.1"
   }
-
 }
