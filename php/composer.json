@@ -1,8 +1,9 @@
 {
     "require": {
-        "react/react": "^0.4.2",
+        "react/react": "dev-master",
         "capmousse/react-restify": "^0.2.0",
         "slim/slim": "~2.0",
-        "illuminate/hashing": "^5.0"
+        "illuminate/hashing": "^5.0",
+        "phluid/phluid":"master-dev"
     }
 }
