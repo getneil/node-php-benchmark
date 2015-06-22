@@ -1,38 +1,32 @@
 <?php
   require 'vendor/autoload.php';
+  require 'router.php';
 
-  $app  = new Phluid\App();
-  $conn = mysqli_connect(getenv("MYSQL_PORT_3306_TCP_ADDR"), "root", "test", "benchmark", getenv("MYSQL_PORT_3306_TCP_PORT"));
+  $loop   = new React\EventLoop\StreamSelectLoop();
+  $socket = new React\Socket\Server($loop);
+  $http   = new React\Http\Server($socket, $loop);
+
+  $mysqli = mysqli_init();
+  ini_set('mysql.connect_timeout', 999999);
+  mysqli_options($mysqli,MYSQLI_OPT_CONNECT_TIMEOUT, 999999);
+  mysqli_options($mysqli,MYSQLI_READ_DEFAULT_GROUP, "max_connections = 99999999");
+  // mysqli_options($mysqli,MYSQLI_READ_DEFAULT_GROUP, "max_allowed_packet = 50M");
+  // mysqli_options($mysqli,MYSQLI_READ_DEFAULT_GROUP, "max_user_connections = 150");
+  $conn = mysqli_real_connect($mysqli, getenv("MYSQL_PORT_3306_TCP_ADDR"), "root", "test","benchmark", getenv("MYSQL_PORT_3306_TCP_PORT"), NULL, MYSQLI_CLIENT_COMPRESS);
+
+  // $conn = mysqli_connect(getenv("MYSQL_PORT_3306_TCP_ADDR"), "root", "test", "benchmark", getenv("MYSQL_PORT_3306_TCP_PORT"));
   if (mysqli_connect_errno()) {
-    die("Error connecting " . mysqli_error($conn));
+      die("Error connecting " . mysqli_error($conn));
   } else {
-    echo 'DB Connected successfully';
+      echo "DB Connected successfully\n";
   }
 
-  // add some handlers
+  $http->on('request', function ($request, $response) use ($mysqli, $conn) {
+    $inpath['method'] = $request->getMethod();
+    $inpath['path']   = $request->getPath();
+    $inpath['query']  = $request->getQuery();
 
-  $app->get('/list', function( $request, $response ) use ($conn) {
-    $result = $conn->query("SELECT * FROM user LIMIT 1000;");
-    $data   = array();
-    while($row = mysqli_fetch_array($result)) {
-      $data[] = $row;
-    }
-    $response->renderText(json_encode($data),'application/json');
+    $newRouter = new reactRouter($request, $response, $inpath, $mysqli, $conn);
   });
-
-  $app->post('/create', function( $request, $response )  use ($conn) {
-    $body = "";
-    $request->on( 'data', function ($data) use (&$body) {
-      $body .= $data;
-    });
-    $request->on( 'end', function () use (&$body, $response, $conn) {
-      $data   = json_decode($body);
-      $result = $conn->query(sprintf("INSERT INTO user (email, password, firstName, lastName, description) VALUES ('%s', '%s', '%s', '%s', '%s')", $data->email, password_hash($data->password, PASSWORD_BCRYPT, array("cost" => 12)), $data->firstName, $data->lastName, $data->description));
-      if(!$result) {
-        die("Failed insertion: ". mysql_error());
-      }
-      $response->renderText("Created");
-    });
-  });
-
-  $app->listen( 4000 );
+  $socket->listen(4000);
+  $loop->run();
