@@ -1,6 +1,5 @@
 <?php
   require 'vendor/autoload.php';
-  require 'router.php';
 
   $loop   = new React\EventLoop\StreamSelectLoop();
   $socket = new React\Socket\Server($loop);
@@ -24,9 +23,33 @@
   $http->on('request', function ($request, $response) use ($mysqli, $conn) {
     $inpath['method'] = $request->getMethod();
     $inpath['path']   = $request->getPath();
-    $inpath['query']  = $request->getQuery();
 
-    $newRouter = new reactRouter($request, $response, $inpath, $mysqli, $conn);
+    if($inpath['path'] == '/list') {
+      $result    = $mysqli->query("SELECT * FROM user LIMIT 1000;");
+      $data      = array();
+
+      while($row = mysqli_fetch_array($result)) {
+        $data[] = $row;
+      }
+      $response->writeHead();
+      $response->end(json_encode($data));
+    } elseif ($inpath['path'] == '/create') {
+        $body     = "";
+        $request->on( 'data', function ($data) use (&$body, $request, $response, $mysqli) {
+          $body .= $data;
+          $newArray = json_decode($body);
+          $qry  = sprintf("INSERT INTO user (email, password, firstName, lastName, description) VALUES ('%s', '%s', '%s', '%s', '%s')", $newArray->email, password_hash($newArray->password, PASSWORD_BCRYPT, array("cost" => 12)), $newArray->firstName, $newArray->lastName, $newArray->description);
+
+          $result      = $mysqli->query($qry);
+          if(!$result) {
+              die("Failed insertion: ". mysql_error());
+          }
+          $newArray->id = mysqli_insert_id($mysqli);
+          $response->writeHead();
+          $response->end(json_encode($newArray));
+        });
+    }
+    // $newRouter = new reactRouter($request, $response, $inpath, $mysqli, $conn);
   });
   $socket->listen(4000);
   $loop->run();
